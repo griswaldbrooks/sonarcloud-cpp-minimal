@@ -1,0 +1,15 @@
+# Build directories
+build/
+*.o
+*.a
+
+# Coverage files
+*.gcda
+*.gcno
+*.gcov
+coverage.xml
+
+# IDE files
+.vscode/
+.idea/
+*.swp
