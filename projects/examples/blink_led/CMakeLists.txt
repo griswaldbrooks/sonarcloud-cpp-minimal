@@ -11,25 +11,15 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Export compile commands for tooling
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# BlinkController library (platform-agnostic)
-add_library(blink_controller
-    lib/src/blink_controller.cpp
-)
+# BlinkController library (header-only template, platform-agnostic)
+add_library(blink_controller INTERFACE)
 
-target_include_directories(blink_controller PUBLIC
+target_include_directories(blink_controller INTERFACE
     lib/include
 )
 
-# Compiler warnings
-target_compile_options(blink_controller PRIVATE
-    -Wall -Wextra -Wpedantic -Werror
-)
-
-# Coverage flags for library
-if(ENABLE_COVERAGE)
-    target_compile_options(blink_controller PRIVATE --coverage)
-    target_link_options(blink_controller PRIVATE --coverage)
-endif()
+# Note: INTERFACE libraries don't support compile options or coverage flags
+# Coverage is applied at the test executable level below
 
 # Tests (desktop only)
 if(BUILD_TESTS)

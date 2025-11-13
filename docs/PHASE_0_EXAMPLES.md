@@ -300,11 +300,75 @@ pixi run upload-blink-leonardo
 - 100% test coverage without physical hardware
 - Pattern scales to complex animatronics state machines
 
-**Actual Implementation:**
+**Actual Implementation (v2 - Dependency Injection):**
+
+**Pattern Evolution:**
+- v1: Controller returns bool, .ino handles digitalWrite → **Logic leaks into .ino for complex cases**
+- v2: Template-based dependency injection → **ALL logic stays in controller, .ino is pure glue**
+
+**Why Dependency Injection:**
+When complexity grows, the return-value pattern breaks down:
+```cpp
+// v1 Problem: Logic leaks into .ino
+bool state = controller.update(millis());
+if (state && brightness_needed) {
+    analogWrite(LED_PIN, calculate_pwm());  // Untestable logic!
+}
+```
+
+**v2 Solution: Inject output behavior**
+```cpp
+// Template-based (zero overhead)
+template<typename OutputPin>
+class BlinkController {
+public:
+    BlinkController(OutputPin& output, uint32_t on_ms, uint32_t off_ms);
+    void update(uint32_t current_ms);  // Handles timing AND output
+};
+```
+
+**Hardware Wrapper (.ino):**
+```cpp
+struct LEDPin {
+    void set(bool state) { digitalWrite(LED_PIN, state ? HIGH : LOW); }
+};
+
+LEDPin led_pin;
+BlinkController<LEDPin> controller(led_pin, 1000, 500);
+
+void loop() {
+    controller.update(millis());  // That's it! No logic leaks.
+}
+```
+
+**Test Mock:**
+```cpp
+struct MockPin {
+    bool state = false;
+    void set(bool s) { state = s; }
+};
+
+TEST(Blink, TurnsOn) {
+    MockPin mock;
+    BlinkController<MockPin> controller(mock, 1000, 500);
+    controller.update(500);
+    EXPECT_TRUE(mock.state);  // Output verified!
+}
+```
+
+**Benefits:**
+- ALL logic testable (timing + output behavior)
+- .ino is pure hardware adapter (<30 lines)
+- Scales to PWM, multiple outputs, complex sequences
+- Zero overhead (static polymorphism via templates)
+- No virtual dispatch, no heap allocation
+- Pattern proven for embedded systems
+
+**Files:**
 - See `/home/griswald/personal/sonarcloud-cpp-minimal/projects/examples/blink_led/`
-- Implementation differs from original plan but achieves same goals
-- Uses simpler pattern: controller returns state, .ino handles GPIO directly
-- No ILed interface needed - separation achieved via time parameter pattern
+- `lib/include/blink_controller.h` - Header-only template (100% coverage)
+- `test/mock_hardware.h` - MockPin and MockTimer
+- `arduino/blink_led.ino` - Minimal wrapper with LEDPin adapter
 
 ---
 
