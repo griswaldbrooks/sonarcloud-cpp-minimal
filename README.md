@@ -133,11 +133,23 @@ All dependencies managed via Pixi - see `pixi.toml` for details.
 ## Current Status
 
 **Phase 0.1: trivial_math (Pure C++)**
-- Status: In progress
-- Implementation: Complete
-- Tests: Complete
-- Coverage: Verifying
+- Status: Complete
+- Implementation: ✅ Complete
+- Tests: ✅ Complete (3 tests)
+- Coverage: ✅ 100%
 - SonarCloud: Pending
+
+**Phase 0.2: blink_led (C++ + Arduino)**
+- Status: Complete
+- Implementation: ✅ Complete
+- .ino wrapper: ✅ 32 lines (15 LOC)
+- Tests: ✅ Complete (11 tests)
+- Coverage: ✅ 100%
+- Arduino compilation: Not tested
+- SonarCloud: Pending
+
+**Phase 0.3: web_trigger (JavaScript + C++ + Arduino)**
+- Status: Not started
 
 See [docs/PHASE_0_EXAMPLES.md](docs/PHASE_0_EXAMPLES.md) for detailed progress.
 

@@ -15,3 +15,4 @@ endif()
 
 # Phase 0 examples
 add_subdirectory(lib/examples/trivial_math)
+add_subdirectory(projects/examples/blink_led)
