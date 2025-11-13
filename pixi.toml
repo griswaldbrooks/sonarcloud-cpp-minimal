@@ -1,0 +1,26 @@
+[project]
+name = "halloween2"
+version = "2.0.0"
+description = "Halloween 2.0 - Modern C++ Animatronics"
+channels = ["conda-forge"]
+platforms = ["linux-64"]
+
+[dependencies]
+cmake = ">=3.14"
+gtest = ">=1.14"
+gcovr = ">=7.0"
+compilers = "*"
+
+[tasks]
+# Phase 0.1: trivial_math example
+test-trivial = "cmake -S. -B build/test -DBUILD_TESTS=ON && cmake --build build/test && ctest --test-dir build/test --output-on-failure"
+coverage-trivial = "cmake -S. -B build/coverage -DBUILD_TESTS=ON -DENABLE_COVERAGE=ON && cmake --build build/coverage && cd build/coverage && ctest && cd ../.. && mkdir -p coverage-html && gcovr -r . --sonarqube coverage.xml --html-details coverage-html/index.html --print-summary --exclude build --exclude '.*test.*'"
+view-coverage-trivial = "xdg-open coverage-html/index.html"
+
+# Convenience aliases
+test = { depends-on = ["test-trivial"] }
+coverage = { depends-on = ["coverage-trivial"] }
+view-coverage = { depends-on = ["view-coverage-trivial"] }
+
+# Cleanup
+clean = "rm -rf build coverage-html coverage.xml"

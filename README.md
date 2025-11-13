@@ -1,62 +1,148 @@
-# SonarCloud C++ Coverage Minimal Reproduction
+# Halloween 2.0 - Modern C++ Animatronics
 
-Minimal C++ project to isolate and understand SonarCloud C++ coverage issues.
+A clean-slate rewrite of the Halloween haunted house animatronics system with modern C++ architecture, comprehensive testing, and multi-platform support.
 
-## Purpose
+## Project Philosophy
 
-This project is designed to:
-- Test SonarCloud C++ coverage in the simplest possible setup
-- Isolate whether the issue is specific to monorepos or fundamental to our approach
-- Provide a minimal reproduction case for debugging or support requests
+**Phase 0 First:** Before migrating any legacy code, we validate our architecture with trivial examples across all target configurations. This ensures:
+- Build systems work correctly
+- Tests run reliably
+- Coverage reports accurately
+- Multi-language integration functions properly
 
-## Structure
+## Current Phase: Phase 0 - Architecture Validation
 
-```
-src/
-  math.h          # Simple header with function declarations
-  math.cpp        # Simple implementation (2 functions)
-test/
-  test_math.cpp   # GoogleTest tests achieving 100% coverage
-```
+Implementing three example configurations to validate the complete toolchain:
 
-## Build and Test
+1. **Pure C++ Library** (`lib/examples/trivial_math/`)
+   - Platform-agnostic logic library
+   - GoogleTest tests
+   - gcov/gcovr coverage reporting
+   - Target: 100% coverage
+
+2. **C++ + Arduino (.ino)** (`projects/examples/blink_led/`)
+   - Minimal .ino wrapper (<50 lines)
+   - C++ logic library
+   - Desktop tests for logic
+   - Arduino compilation for hardware
+   - Coverage for C++ components
+
+3. **JavaScript + C++ + Arduino** (`projects/examples/web_trigger/`)
+   - Node.js/Express server
+   - C++ Arduino component
+   - Serial/WebSocket communication
+   - Jest tests (JavaScript)
+   - GoogleTest tests (C++)
+   - Dual-language coverage reporting
+
+## Phase 0 Success Criteria
+
+- All 3 examples build successfully
+- All tests pass (100%)
+- Coverage reports to SonarCloud (80%+ for all)
+- CI/CD runs all examples automatically
+- Documentation demonstrates each pattern clearly
+
+**Timeline:** 2-3 weeks before Phase 1 (legacy migration)
+
+## Quick Start
 
 ```bash
-# Configure
-cmake -B build -DCMAKE_BUILD_TYPE=Debug
+# Install dependencies via Pixi
+pixi install
 
-# Build
-cmake --build build
+# Test trivial_math example (Phase 0.1)
+pixi run test-trivial
 
-# Run tests
-cd build && ctest --output-on-failure
+# Generate coverage report
+pixi run coverage-trivial
 
-# Generate coverage
-gcovr -r . --sonarqube coverage.xml --exclude test/ --print-summary
+# View coverage locally
+xdg-open build/coverage/coverage-trivial/index.html
 ```
 
-## Expected Results
+## Repository Structure
 
-**Local Coverage:** 100% (all lines in math.cpp covered)
+```
+halloween2/
+├── lib/
+│   ├── animatronics_core/       # Future: Core libraries
+│   └── examples/                # Phase 0: Architecture validation
+│       └── trivial_math/        # Pure C++ example
+├── projects/
+│   └── examples/                # Phase 0: Project patterns
+│       ├── blink_led/           # C++ + .ino example
+│       └── web_trigger/         # JS + C++ + .ino example
+├── toolchains/                  # CMake toolchain files
+├── docs/                        # Project documentation
+├── pixi.toml                    # Environment management
+└── sonar-project.properties     # SonarCloud config
+```
 
-**SonarCloud Coverage:**
-- If this works: We know the issue is with our monorepo setup
-- If this fails: We know something fundamental is wrong with our approach
+## Technology Stack
 
-## Key Configuration
+- **Build System:** CMake 3.14+ with compile_commands.json
+- **Testing:** GoogleTest (C++), Jest (JavaScript)
+- **Coverage:** gcov/gcovr (C++), c8 (JavaScript)
+- **Environment:** Pixi (replaces Docker/conda)
+- **CI/CD:** GitHub Actions
+- **Quality:** SonarCloud analysis
+- **Hardware:** Arduino (Leonardo, Nano, Beetle), NodeMCU, RPi Pico
 
-- **CMake:** Exports compile_commands.json, enables --coverage flag
-- **gcovr:** Generates SonarQube XML format
-- **SonarCloud:** Uses cfamily.compile-commands and coverageReportPaths
-- **NO projectBaseDir:** Keeping it as simple as possible
+## Documentation
 
-## Differences from cmake_prototype
+- [docs/CLEAN_SLATE_IMPLEMENTATION_PLAN.md](docs/CLEAN_SLATE_IMPLEMENTATION_PLAN.md) - Full implementation roadmap
+- [docs/PHASE_0_EXAMPLES.md](docs/PHASE_0_EXAMPLES.md) - Phase 0 validation guide
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - System architecture
+- [CLAUDE.md](CLAUDE.md) - AI agent instructions and context
 
-- Single project (not monorepo)
-- No projectBaseDir complexity
-- Minimal code (10 lines vs 100s)
-- Direct paths (no subdirectories)
+## Parent Project
 
-## Investigation Results
+This is a clean-slate rewrite of the [halloween](https://github.com/griswaldbrooks/halloween) project. The original repo contains:
+- Legacy implementations (hatching_egg, spider_crawl_projection, etc.)
+- Investigation history and lessons learned
+- Testing tools and utilities
 
-[To be filled in after CI/CD run and verification]
+## Build Requirements
+
+- CMake 3.14+
+- GCC/Clang with C++17 support
+- GoogleTest 1.14+
+- gcovr 7.0+
+- Node.js 18+ (for JavaScript examples)
+- PlatformIO (for Arduino uploads)
+
+All dependencies managed via Pixi - see `pixi.toml` for details.
+
+## Development Workflow
+
+1. **Start with Phase 0:** Validate architecture with trivial examples
+2. **Test-driven:** Write tests before implementation (80%+ coverage goal)
+3. **Hardware abstraction:** Business logic never calls hardware directly
+4. **Incremental commits:** Small, focused changes with descriptive messages
+5. **SonarCloud verification:** Fix issues before considering work complete
+
+## Quality Standards
+
+- **Test Coverage:** 80%+ across all languages
+- **SonarCloud:** No bugs or vulnerabilities, minimal code smells
+- **Hardware Independence:** Core logic testable without physical devices
+- **Documentation:** Keep minimal, current, and actionable
+- **Code Style:** clang-format for C++, prettier for JavaScript
+
+## Current Status
+
+**Phase 0.1: trivial_math (Pure C++)**
+- Status: In progress
+- Implementation: Complete
+- Tests: Complete
+- Coverage: Verifying
+- SonarCloud: Pending
+
+See [docs/PHASE_0_EXAMPLES.md](docs/PHASE_0_EXAMPLES.md) for detailed progress.
+
+---
+
+**Created:** 2025-11-12
+**Purpose:** Production-ready Halloween animatronics with modern architecture
+**Approach:** Validate architecture first, then migrate legacy code incrementally

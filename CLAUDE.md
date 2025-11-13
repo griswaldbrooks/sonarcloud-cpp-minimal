@@ -1,183 +1,257 @@
-# SonarCloud C++ Coverage Minimal Reproduction Project
+# Halloween 2.0 - Clean Slate Implementation
 
 ## Project Overview
 
-This is a minimal C++ reproduction project for investigating SonarCloud coverage display issues. It serves as an isolated test case to determine whether coverage integration problems are monorepo-related or fundamental to the SonarCloud configuration.
+Halloween 2.0 is a clean-slate rewrite of the Halloween haunted house animatronics system. This project prioritizes architecture validation before migrating any legacy code.
 
-**Status:** Ready for SonarCloud configuration and testing
+**Status:** Phase 0 - Architecture Validation (In Progress)
 
 ## Purpose
 
-Determine root cause of SonarCloud C++ coverage not displaying by testing in a minimal, single-project repository:
-- **If coverage works here:** Issue is monorepo-related (multi-project complexity)
-- **If coverage fails here:** Issue is fundamental (configuration or SonarCloud limitation)
+Build a production-ready animatronics system with:
+- Modern C++ architecture (C++17+)
+- Comprehensive testing (80%+ coverage goal)
+- Multi-platform support (Arduino Leonardo, Nano, Beetle, NodeMCU, RPi Pico)
+- Hardware abstraction for testability
+- Multi-language integration (C++, JavaScript, Python)
 
-## Background
+## Phase 0: Architecture Validation
 
-This project was created after 3 failed attempts to fix C++ coverage in the halloween/cmake_prototype project:
+**Principle:** Validate the entire toolchain with trivial examples BEFORE migrating legacy code.
 
-1. **Attempt 1:** sonar.cfamily.gcov.pathPrefix (failed)
-2. **Attempt 2:** sonar.sources path adjustment (failed)
-3. **Attempt 3:** compile_commands.json path workaround (failed)
+### Three Required Examples
 
-All attempts showed same symptom: local coverage = 100%, SonarCloud coverage = 0%
+1. **Pure C++ Library** (`lib/examples/trivial_math/`)
+   - Platform-agnostic business logic
+   - GoogleTest tests achieving 100% coverage
+   - gcov/gcovr coverage reporting
+   - No hardware dependencies
+   - **Status:** In progress
 
-**Hypothesis:** The halloween repo's monorepo structure (multiple projects in subdirectories) may be causing path resolution issues that prevent SonarCloud from correctly attributing coverage data.
+2. **C++ + Arduino (.ino)** (`projects/examples/blink_led/`)
+   - Minimal .ino file (<50 lines) as thin wrapper
+   - C++ logic library (blink timing, state management)
+   - Desktop tests for C++ logic
+   - Arduino compilation for hardware deployment
+   - Coverage for C++ only (not .ino)
+   - **Status:** Not started
 
-## Project Structure
+3. **JavaScript + C++ + Arduino** (`projects/examples/web_trigger/`)
+   - Node.js/Express server with Socket.IO
+   - C++ Arduino component
+   - Serial/WebSocket communication protocol
+   - Jest tests for JavaScript (80%+ coverage)
+   - GoogleTest for C++ (80%+ coverage)
+   - Dual-language coverage reporting to SonarCloud
+   - **Status:** Not started
+
+### Phase 0 Success Criteria
+
+Must achieve ALL before proceeding to Phase 1:
+- All 3 examples build successfully
+- All tests pass (100% pass rate)
+- Coverage reports correctly to SonarCloud (80%+ for each)
+- CI/CD pipeline runs all examples automatically
+- Documentation demonstrates each pattern clearly
+- No SonarCloud bugs or vulnerabilities
+
+**Timeline:** 2-3 weeks
+
+## Repository Structure
 
 ```
-sonarcloud-cpp-minimal/
-├── src/
-│   ├── math_utils.h          # Header with inline functions
-│   └── math_utils.cpp         # Implementation file
-├── test/
-│   └── test_math_utils.cpp    # GoogleTest unit tests
-├── CMakeLists.txt             # Build configuration with coverage
-├── sonar-project.properties   # SonarCloud configuration
-├── .github/workflows/         # CI with coverage generation
-├── SETUP.md                   # Step-by-step setup instructions
-├── PROJECT_SUMMARY.md         # Investigation framework
-└── CLAUDE.md                  # This file
+halloween2/
+├── lib/
+│   ├── animatronics_core/            # Phase 1+: Core libraries
+│   │   ├── state_machine/            # Reusable state machine
+│   │   ├── servo_control/            # Servo abstractions
+│   │   └── timing/                   # Timing utilities
+│   └── examples/                     # Phase 0: Validation
+│       └── trivial_math/             # Pure C++ example
+│           ├── include/trivial_math.h
+│           ├── src/trivial_math.cpp  # (if needed)
+│           ├── test/test_trivial_math.cpp
+│           └── CMakeLists.txt
+├── projects/
+│   └── examples/                     # Phase 0: Project patterns
+│       ├── blink_led/                # C++ + .ino
+│       │   ├── lib/blink_logic/      # C++ logic
+│       │   ├── arduino/blink_led.ino # Thin wrapper
+│       │   ├── test/                 # Desktop tests
+│       │   └── CMakeLists.txt
+│       └── web_trigger/              # JS + C++ + .ino
+│           ├── server/               # Node.js app
+│           ├── arduino/              # C++ + .ino
+│           ├── test/                 # Jest + GoogleTest
+│           └── CMakeLists.txt
+├── toolchains/
+│   ├── Desktop.cmake                 # Native x86_64
+│   └── Arduino-leonardo.cmake        # Arduino Leonardo target
+├── docs/
+│   ├── CLEAN_SLATE_IMPLEMENTATION_PLAN.md  # Full roadmap
+│   ├── PHASE_0_EXAMPLES.md           # Phase 0 guide
+│   └── ARCHITECTURE.md               # System architecture
+├── .github/workflows/
+│   └── ci.yml                        # Multi-platform CI
+├── .clang-format                     # C++ code style
+├── .clang-tidy                       # C++ linting
+├── CMakeLists.txt                    # Root build file
+├── pixi.toml                         # Environment management
+├── sonar-project.properties          # SonarCloud config
+├── README.md                         # Project overview
+└── CLAUDE.md                         # This file
 ```
 
 ## Technology Stack
 
 - **Build System:** CMake 3.14+ with `CMAKE_EXPORT_COMPILE_COMMANDS=ON`
-- **Testing:** GoogleTest (gtest 1.12+)
-- **Coverage Generation:** gcovr with SonarQube XML output format
+- **Testing:** GoogleTest 1.14+ (C++), Jest (JavaScript)
+- **Coverage:** gcov/gcovr (C++), c8 (JavaScript)
+- **Environment:** Pixi (replaces Docker/conda)
 - **CI/CD:** GitHub Actions
-- **Analysis:** SonarCloud with CFamily sensor
-- **Verification:** API-based tool from halloween repo
+- **Quality:** SonarCloud with CFamily sensor
+- **Hardware:** PlatformIO for Arduino uploads
 
-## Key Configuration
+## Development Standards
 
-**CMakeLists.txt features:**
-- `CMAKE_EXPORT_COMPILE_COMMANDS=ON` - Required for SonarCloud CFamily sensor
-- `-fprofile-arcs -ftest-coverage` - GCC coverage flags
-- gcovr generates both HTML (local) and XML (SonarCloud) formats
+### Testing Requirements
+- **Core logic:** 80%+ coverage minimum
+- **Hardware wrappers:** Integration tests with mocks
+- **UI/Preview tools:** Manual testing acceptable
 
-**sonar-project.properties:**
-- `sonar.projectKey=griswaldbrooks_sonarcloud-cpp-minimal`
-- `sonar.organization=griswaldbrooks`
-- `sonar.sources=src`
-- `sonar.tests=test`
-- `sonar.coverageReportPaths=coverage.xml`
+### Hardware Abstraction
+- Business logic NEVER calls hardware directly
+- Interface classes for all hardware (IServoController, ISensor)
+- Mock implementations for testing
+- .ino files are thin wrappers only (<50 lines)
 
-**GitHub Actions workflow:**
-- Builds with coverage flags
-- Runs tests
-- Generates gcovr XML report
-- Uploads to SonarCloud
+### Code Quality
+- No SonarCloud bugs or vulnerabilities
+- Fix code smells when reasonable
+- Use clang-format for C++ (Google style)
+- Follow modern C++ patterns (RAII, smart pointers, constexpr)
 
-## Success Criteria
+### Documentation Hygiene
+- Keep minimal and focused (<10 markdown files ideal)
+- Merge aggressively when docs overlap
+- Archive or delete outdated documentation
+- Each piece of info lives in ONE place
+- Update docs as part of implementation, not after
 
-### If Coverage Works (Displays in SonarCloud)
-- **Conclusion:** Issue is monorepo-related
-- **Next Step:** Compare this config with halloween/cmake_prototype line-by-line
-- **Look for:** Path differences, sonar.projectBaseDir usage, multi-module setup
-- **Action:** Apply working config to halloween repo
+## Pixi Environment
 
-### If Coverage Fails (0% in SonarCloud)
-- **Conclusion:** Fundamental issue with gcovr + SonarCloud C++
-- **Next Step:** File SonarCloud support ticket with this minimal reproduction
-- **Evidence:** Simple project, correct formats, still doesn't work
-- **Action:** Wait for SonarCloud guidance or explore alternative approaches
+All projects MUST have standardized pixi tasks:
 
-## Next Steps (For Next Agent)
+### Required Tasks
+- `pixi run test` - Run all unit tests
+- `pixi run coverage` - Generate code coverage report
+- `pixi run view-coverage` - Open coverage in browser
 
-1. **Verify SONAR_TOKEN is configured** (user must add as GitHub secret)
-2. **Trigger CI/CD:** Commit and push to start analysis
-3. **Wait for completion:** GitHub Actions + SonarCloud analysis
-4. **Verify with tool:**
-   ```bash
-   python /home/griswald/personal/halloween/tools/sonarcloud_verify.py \
-       --project griswaldbrooks_sonarcloud-cpp-minimal
-   ```
-5. **Analyze results** using framework in PROJECT_SUMMARY.md
-6. **Document findings** and determine next action
-
-## Tools Available
-
-### sonarcloud_verify.py
-Located in halloween repo: `/home/griswald/personal/halloween/tools/sonarcloud_verify.py`
-
-**Usage:**
-```bash
-# Check coverage state
-python /home/griswald/personal/halloween/tools/sonarcloud_verify.py \
-    --project griswaldbrooks_sonarcloud-cpp-minimal
-
-# Compare with local coverage
-python /home/griswald/personal/halloween/tools/sonarcloud_verify.py \
-    --project griswaldbrooks_sonarcloud-cpp-minimal \
-    --compare-local coverage.xml
+### Example pixi.toml (trivial_math)
+```toml
+[tasks]
+test-trivial = "cmake -S. -B build/test -DBUILD_TESTS=ON && cmake --build build/test && ctest --test-dir build/test --output-on-failure"
+coverage-trivial = "cmake -S. -B build/coverage -DBUILD_TESTS=ON -DENABLE_COVERAGE=ON && cmake --build build/coverage && cd build/coverage && ctest && gcovr -r ../.. --sonarqube ../../coverage.xml --print-summary"
+view-coverage-trivial = "xdg-open build/coverage/coverage-trivial/index.html"
 ```
 
-**What it reveals:**
-- Actual coverage percentages per file (not just dashboard view)
-- Which files SonarCloud has coverage data for
-- Path mismatches between local and SonarCloud
-- Comparison with expected local coverage
+## SonarCloud Integration
 
-See `/home/griswald/personal/halloween/tools/README.md` for full documentation.
+### Configuration
+- Project key: `griswaldbrooks_halloween2`
+- Organization: `griswaldbrooks`
+- Multi-language: C++, JavaScript (Python later)
+- Coverage format: gcovr SonarQube XML (C++), LCOV (JavaScript)
 
-## Reference Documentation
+### Quality Gates
+After pushing to GitHub:
+1. Wait for SonarCloud analysis to complete
+2. Review dashboard for issues
+3. Fix bugs and vulnerabilities immediately
+4. Address code smells if reasonable
+5. Verify coverage reported correctly
+6. Push fixes and re-verify
 
-**In this repo:**
-- `README.md` - Project description and build instructions
-- `SETUP.md` - Step-by-step SonarCloud setup
-- `PROJECT_SUMMARY.md` - Analysis framework and decision tree
-- `NEXT_AGENT_QUICKSTART.md` - Quick start for next session
+### Verification Tool
+Use halloween repo tool for ground truth:
+```bash
+python /home/griswald/personal/halloween/tools/sonarcloud_verify.py \
+    --project griswaldbrooks_halloween2
+```
 
-**In halloween repo:**
-- `/home/griswald/personal/halloween/CLAUDE.md` - Full project conventions
-- `/home/griswald/personal/halloween/cmake_prototype/` - Original prototype
-- `/home/griswald/personal/halloween/tools/` - Verification tools
-- `/home/griswald/personal/halloween/SESSION_2025-11-12_CMAKE_PROTOTYPE.md` - Full investigation history
+## Parent Project Reference
 
-## Key Insights from Halloween Investigation
+This is a rewrite of: `/home/griswald/personal/halloween`
 
-1. **compile_commands.json is required** - CFamily sensor won't analyze without it
-2. **gcovr SonarQube XML is correct format** - Not .gcov or LCOV
-3. **Code duplication breaks attribution** - Single source of truth is critical
-4. **Tool verification is essential** - Don't trust UI alone, use API tools
-5. **Path resolution is fragile** - Small path mismatches cause silent failures
+**Lessons Learned from Halloween 1.0:**
+1. compile_commands.json is REQUIRED for CFamily sensor
+2. Code duplication breaks coverage attribution
+3. Path resolution is fragile - test early
+4. Tool verification is essential - don't trust UI alone
+5. SonarCloud "fixes" can break functionality - always test after
+6. Hardware abstraction is critical for testability
 
-## Expected Timeline
+**Key Successes to Replicate:**
+- Spider crawl projection: 24% → 94% coverage via incremental extraction
+- Hatching egg: 85.9% C++ coverage with hardware abstraction
+- Test-driven approach prevented regressions
 
-- **User action:** Add SONAR_TOKEN secret (2 minutes)
-- **CI/CD run:** 3-5 minutes
-- **SonarCloud analysis:** 2-3 minutes
-- **Tool verification:** 30 seconds
-- **Analysis:** 10-15 minutes
-- **Total:** ~20 minutes to definitive answer
-
-## Communication with User
+## Communication Standards
 
 When reporting results:
-- ✅ **Do** verify with tool before claiming success/failure
-- ✅ **Do** show actual API output, not assumptions
+- ✅ **Do** verify locally first (run tests, check coverage)
+- ✅ **Do** use tools to verify external systems (SonarCloud API)
+- ✅ **Do** show actual output, not assumptions
 - ✅ **Do** be specific about what was tested
+- ❌ **Don't** claim external services work without verification
 - ❌ **Don't** rely on dashboard screenshots alone
-- ❌ **Don't** claim things work without API verification
-- ❌ **Don't** guess about SonarCloud state
+- ⚠️ **Be honest** about what cannot be verified (hardware behavior)
 
-## This is a Focused Investigation
+## Current Focus
 
-This project exists for ONE purpose: answer the monorepo vs fundamental question.
+**Phase 0.1: trivial_math (Pure C++ Library)**
+- Implement header-only math utilities
+- Write GoogleTest tests achieving 100% coverage
+- Configure CMake with coverage flags
+- Generate gcovr reports (XML for SonarCloud, HTML for local)
+- Verify coverage reports correctly
+- Document the pattern for future examples
 
-**Keep it simple:**
-- No additional features
-- No complex test scenarios
-- No optimization attempts
-- Just: does coverage display or not?
+**Next:** Phase 0.2 (blink_led), Phase 0.3 (web_trigger)
 
-Once we have the answer, this repo may be archived or deleted. Its value is in providing clarity, not in long-term maintenance.
+## Implementation Plan Reference
+
+See `docs/CLEAN_SLATE_IMPLEMENTATION_PLAN.md` for:
+- Complete phase breakdown (Phases 0-5)
+- Detailed timelines
+- Success criteria per phase
+- Migration strategy from halloween 1.0
+- Risk mitigation approaches
+
+## Timeline
+
+- **Phase 0:** 2-3 weeks (Architecture validation)
+- **Phase 1:** 4-6 weeks (Core libraries)
+- **Phase 2:** 6-8 weeks (Hatching egg migration)
+- **Phase 3:** 4-6 weeks (Spider projection migration)
+- **Phase 4:** 6-8 weeks (Window spider + Body)
+- **Phase 5:** 2-3 weeks (Polish and docs)
+
+**Total:** 24-34 weeks (6-8.5 months)
+
+## Success Metrics
+
+At completion of Phase 0:
+- 3/3 examples building
+- 100% tests passing
+- 80%+ coverage reported to SonarCloud for each
+- CI/CD green for all examples
+- Documentation complete and validated
+- Zero SonarCloud bugs/vulnerabilities
 
 ---
 
 **Created:** 2025-11-12
-**Purpose:** Isolate SonarCloud C++ coverage issue
-**Parent Project:** `/home/griswald/personal/halloween`
-**Related:** halloween/cmake_prototype (0% coverage in SonarCloud despite 100% local)
+**Purpose:** Production-ready Halloween animatronics with validated architecture
+**Approach:** Phase 0 validation first, then incremental legacy migration
+**Parent Project:** [halloween](https://github.com/griswaldbrooks/halloween)

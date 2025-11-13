@@ -1,5 +1,6 @@
 # Build directories
 build/
+coverage-html/
 *.o
 *.a
 
@@ -9,7 +10,16 @@ build/
 *.gcov
 coverage.xml
 
+# Pixi
+.pixi/
+pixi.lock
+
 # IDE files
 .vscode/
 .idea/
 *.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
