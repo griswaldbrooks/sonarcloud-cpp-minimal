@@ -18,6 +18,13 @@ target_include_directories(blink_controller INTERFACE
     lib/include
 )
 
+# ConsoleSimulator library (header-only, testable console utilities)
+add_library(console_simulator INTERFACE)
+
+target_include_directories(console_simulator INTERFACE
+    lib/include
+)
+
 # Note: INTERFACE libraries don't support compile options or coverage flags
 # Coverage is applied at the test and demo executable levels below
 
@@ -29,6 +36,7 @@ add_executable(blink_demo
 
 target_link_libraries(blink_demo
     blink_controller
+    console_simulator
 )
 
 # Coverage flags for demo executable
@@ -49,7 +57,7 @@ if(BUILD_TESTS)
     )
     FetchContent_MakeAvailable(googletest)
 
-    # Test executable
+    # Test executable - blink_controller
     add_executable(test_blink_controller
         test/test_blink_controller.cpp
     )
@@ -71,4 +79,23 @@ if(BUILD_TESTS)
 
     # Register with CTest
     add_test(NAME BlinkControllerTests COMMAND test_blink_controller)
+
+    # Test executable - console_simulator
+    add_executable(test_console_simulator
+        test/test_console_simulator.cpp
+    )
+
+    target_link_libraries(test_console_simulator
+        console_simulator
+        GTest::gtest_main
+    )
+
+    # Coverage flags for test executable
+    if(ENABLE_COVERAGE)
+        target_compile_options(test_console_simulator PRIVATE --coverage)
+        target_link_options(test_console_simulator PRIVATE --coverage)
+    endif()
+
+    # Register with CTest
+    add_test(NAME ConsoleSimulatorTests COMMAND test_console_simulator)
 endif()
